@@ -8,7 +8,7 @@ const init = () => {
 };
 
 const viewDepartments = () => {
-  const sql = `SELECT id AS ID, name AS Department FROM departments;;`
+  const sql = `SELECT id AS Department_ID, name AS Department FROM departments;;`
 
   db.query(sql, (err, rows) => {
     console.table(rows);
@@ -16,7 +16,13 @@ const viewDepartments = () => {
 };
 
 const viewRoles = () => {
-  const sql = ``
+  const sql = `SELECT title AS Title, roles.id AS Role_Id, departments.name AS Department_Name, salary AS Salary
+  FROM roles
+  INNER JOIN departments ON roles.department_id = departments.id;`
+
+  db.query(sql, (err, rows) => {
+    console.table(rows);
+  })
 }
 
 const promptUser = () => {
@@ -40,7 +46,7 @@ const promptUser = () => {
     }
 
     if (response.userChoices === 'View all roles') {
-      console.log('View all roles');
+      viewRoles();
     }
 
     if (response.userChoices === 'View all employees') {

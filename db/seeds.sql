@@ -6,13 +6,13 @@ VALUES
     ('Sales'),
     ('Marketing');
 
-INSERT INTO roles (first_name, last_name, role_id, manager_id)
+INSERT INTO roles (title, salary, department_id)
 VALUES
-    ('Engineer 1', 'Russell', 2, 1),
-    ('Engineering Manager', 'Smith', 1, 1),
-    ('Marketing Specialist 1', 'Ross', 3, 1),
-    ('Sales Development Representative 1', 'Anderson', 4, 1),
-    ('Engineer 1', 'Tash', 5, 1);
+    ('Engineer', '95000', 1),
+    ('Engineering Manager', '200000', 2),
+    ('Marketing Specialist', '75000', 3),
+    ('Sales DR', '45000', 4),
+    ('UX Designer', '85000', 5);
 
 INSERT INTO employees (first_name, last_name, role_id, manager_id)
 VALUES
