@@ -23,7 +23,24 @@ const viewRoles = () => {
   db.query(sql, (err, rows) => {
     console.table(rows);
   })
-}
+};
+
+const viewEmployees = () => {
+  const sql = `SELECT
+              employees.id,
+              CONCAT (employees.first_name, ' ', employees.last_name) AS 'Name',
+              roles.title AS 'Title',
+              departments.name AS 'Department Name',
+              roles.salary AS 'Salary',
+              CONCAT(manager.first_name, ' ', manager.last_name) AS 'Manager'
+              FROM employees
+              LEFT JOIN roles on employees.role_id=roles.id
+              LEFT JOIN departments on roles.department_id=departments.id
+              LEFT JOIN employees manager on manager.id = employees.manager_id;`
+  db.query(sql, (err, rows) => {
+    console.table(rows);
+  });
+};
 
 const promptUser = () => {
   inquirer.prompt({
@@ -50,7 +67,7 @@ const promptUser = () => {
     }
 
     if (response.userChoices === 'View all employees') {
-      console.log('View all employees');
+      viewEmployees();
     }
 
     if (response.userChoices === 'Add a department') {
