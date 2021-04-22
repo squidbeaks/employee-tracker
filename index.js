@@ -1,9 +1,18 @@
 const inquirer = require('inquirer');
+const db = require('./db/connection');
 
 const init = () => {
   console.log("woot!!");
   promptUser();
 };
+
+const viewDepartments = () => {
+  const sql = `SELECT * FROM departments;`
+
+  db.query(sql, (err, rows) => {
+    console.log(rows);
+  })
+}
 
 const promptUser = () => {
   inquirer.prompt({
@@ -22,7 +31,7 @@ const promptUser = () => {
   })
   .then(response => {
     if (response.userChoices === 'View all departments') {
-      console.log('View all departments');
+      viewDepartments();
     }
 
     if (response.userChoices === 'View all roles') {
