@@ -1,5 +1,6 @@
 const inquirer = require('inquirer');
 const db = require('./db/connection');
+const cTable = require('console.table');
 
 const init = () => {
   console.log("woot!!");
@@ -7,11 +8,15 @@ const init = () => {
 };
 
 const viewDepartments = () => {
-  const sql = `SELECT * FROM departments;`
+  const sql = `SELECT id AS ID, name AS Department FROM departments;;`
 
   db.query(sql, (err, rows) => {
-    console.log(rows);
+    console.table(rows);
   })
+};
+
+const viewRoles = () => {
+  const sql = ``
 }
 
 const promptUser = () => {
