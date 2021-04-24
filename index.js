@@ -144,15 +144,38 @@ const addEmployee = () => {
       choices: employeeChoices
     }
   ])
-  // const sql = ``;
-  // db.query(sql, params, (err, rows) => {
-  //
-  // })
   .then(responses => {
     console.log(responses);
-    console.log(`${responses.firstName} ${responses.lastName} successfully added to Employees database!`)
+
+    const roleIdSql = `SELECT id FROM roles WHERE title = '${responses.role}';`
+    let role_id;
+
+    db.query(roleIdSql, (err, rows) => {
+      role_id = rows[0].id;
+
+      const mgrName = `${responses.manager}`;
+      const mgrNameArr = mgrName.split(' ');
+      let employee_id;
+
+      const mgrSql =  `SELECT id FROM employees WHERE first_name = '${mgrNameArr[0]}' AND last_name = '${mgrNameArr[1]}';`;
+
+      db.query(mgrSql, (err, rows) => {
+        employee_id = rows[0].id;
+        console.log(employee_id);
+
+        const sql = `INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?,?,?,?);`
+        console.log(sql);
+        const params = [`${responses.firstName}`, `${responses.lastName}`, role_id, employee_id];
+        console.log(params);
+
+        db.query(sql, params, (err, rows) => {
+          console.log(rows);
+          console.log(`${responses.firstName} ${responses.lastName} successfully added to Employees database!`);
+        });
+      });
+    })
   })
-}
+};
 
 const viewEmployees = () => {
   const sql = `SELECT
