@@ -150,7 +150,7 @@ const addEmployee = () => {
   // })
   .then(responses => {
     console.log(responses);
-    console.log(`${employee.name} successfully added to Employees database!`)
+    console.log(`${responses.firstName} ${responses.lastName} successfully added to Employees database!`)
   })
 }
 
