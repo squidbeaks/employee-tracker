@@ -45,14 +45,14 @@ const viewRoles = () => {
 };
 
 const addRoles = () => {
-  const rolesSql = `SELECT
+  const departmentSql = `SELECT
               departments.name
               FROM roles
               LEFT JOIN departments ON roles.department_id = departments.id;`;
 
   const choices = [];
 
-  db.query(rolesSql, (err, rows) => {
+  db.query(departmentSql, (err, rows) => {
     for (let i = 0; i < rows.length; i++) {
       if (choices.indexOf(rows[i].name) === -1) {
         choices.push(rows[i].name);
@@ -94,6 +94,64 @@ const addRoles = () => {
       })
     });
   });
+};
+
+const addEmployee = () => {
+  const roleChoices = [];
+  const employeeChoices = [];
+
+  const roleSql = `SELECT title FROM roles;`;
+  const employeeSql = `SELECT CONCAT (employees.first_name, ' ', employees.last_name) AS name FROM employees;`;
+
+  db.query(roleSql, (err, rows) => {
+    for (let i = 0; i < rows.length; i++) {
+      if (roleChoices.indexOf(rows[i].title) === -1) {
+        roleChoices.push(rows[i].title);
+      }
+    }
+  });
+
+  db.query(employeeSql, (err, rows) => {
+    for (let i = 0; i < rows.length; i++) {
+      if (employeeChoices.indexOf(rows[i].name) === -1) {
+        employeeChoices.push(rows[i].name);
+      }
+    }
+  });
+
+  inquirer.prompt([
+    {
+      type: 'input',
+      name: 'firstName',
+      message: 'What is the first name of the employee you would like to add?'
+    },
+    {
+      type: 'input',
+      name: 'lastName',
+      message: 'What is the last name of the employee you would like to add?'
+    },
+    {
+      type: 'list',
+      name: 'role',
+      message: 'What role is this employee?',
+      choices: roleChoices
+
+    },
+    {
+      type: 'list',
+      name: 'manager',
+      message: 'Who does this employee report to?',
+      choices: employeeChoices
+    }
+  ])
+  // const sql = ``;
+  // db.query(sql, params, (err, rows) => {
+  //
+  // })
+  .then(responses => {
+    console.log(responses);
+    console.log(`${employee.name} successfully added to Employees database!`)
+  })
 }
 
 const viewEmployees = () => {
@@ -150,7 +208,7 @@ const promptUser = () => {
     }
 
     if (response.userChoices === 'Add an employee') {
-      console.log('Add an employee');
+      addEmployee();
     }
 
     if (response.userChoices === 'Update an employee') {
