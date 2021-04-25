@@ -17,6 +17,7 @@ const promptUser = () => {
         'Add a role',
         'Add an employee',
         'Update an employee role',
+        'Update an employee manager',
         'Exit'
       ]
     }
@@ -48,6 +49,10 @@ const promptUser = () => {
 
     if (response.userChoices === 'Update an employee role') {
       updateEmployeeRole();
+    }
+
+    if (response.userChoices === 'Update an employee manager') {
+      updateEmployeeMgr();
     }
 
     if (response.userChoices === 'Exit') {
@@ -306,6 +311,69 @@ const updateEmployeeRole = () => {
       })
     })
   })
+};
+
+const updateEmployeeMgr = () => {
+  const employeeSql = `SELECT CONCAT (employees.first_name, ' ', employees.last_name) AS name FROM employees;`;
+
+  db.query(employeeSql, (err, rows) => {
+    const employeeChoices = [];
+
+    for (let i = 0; i < rows.length; i++) {
+      if (employeeChoices.indexOf(rows[i].name) === -1) {
+        employeeChoices.push(rows[i].name);
+      }
+    }
+
+    inquirer.prompt([
+      {
+        type: 'list',
+        name: 'employee',
+        message: "Which employee's manager would you like to update?",
+        choices: employeeChoices
+      },
+      {
+        type: 'list',
+        name: 'manager',
+        message: 'Who is their new manager?',
+        choices: employeeChoices
+      }
+    ])
+    .then(responses => {
+      console.log(responses);
+
+      const empName = `${responses.employee}`;
+      const empNameArr = empName.split(' ');
+      let employee_id;
+
+      const empSql =  `SELECT id FROM employees WHERE first_name = '${empNameArr[0]}' AND last_name = '${empNameArr[1]}';`;
+
+      db.query(empSql, (err, rows) => {
+        employee_id = rows[0].id;
+        console.log(employee_id);
+
+        const mgrName = `${responses.manager}`;
+        const mgrNameArr = mgrName.split(' ');
+        let manager_id;
+
+        const mgrSql = `SELECT id FROM employees WHERE first_name = '${mgrNameArr[0]}' AND last_name = '${mgrNameArr[1]}';`;
+
+        db.query(mgrSql, (err, rows) => {
+          manager_id = rows[0].id;
+          console.log(manager_id);
+
+          const sql = `UPDATE employees SET manager_id = ? WHERE id = ?;`
+          const params = [manager_id, employee_id];
+
+          db.query(sql, params, (err, rows) => {
+            console.log(rows);
+            console.log(`${responses.employee}'s manager has been successfully updated!`);
+            promptUser();
+          })
+        })
+      });
+    });
+  });
 };
 
 const viewEmployees = () => {
