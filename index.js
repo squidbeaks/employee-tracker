@@ -177,8 +177,9 @@ const addEmployee = () => {
   })
 };
 
-const updateEmployee = () => {
+const updateEmployeeRole = () => {
   const employeeSql = `SELECT CONCAT (employees.first_name, ' ', employees.last_name) AS name FROM employees;`;
+  const roleSql = `SELECT title FROM roles;`;
 
   db.query(employeeSql, (err, rows) => {
     const employeeChoices = [];
@@ -189,26 +190,58 @@ const updateEmployee = () => {
       }
     }
 
-    inquirer.prompt([
-      {
-        type: 'list',
-        name: 'employees',
-        message: 'Who does this employee report to?',
-        choices: []
-      },
-      {
-        type: 'input',
-        name: 'firstName',
-        message: 'What is the first name of the employee you would like to add?'
-      },
-      {
-        type: 'input',
-        name: 'lastName',
-        message: 'What is the last name of the employee you would like to add?'
+    db.query(roleSql, (err, rows) => {
+      const roleChoices = [];
+
+      for (let i = 0; i < rows.length; i++) {
+        if (roleChoices.indexOf(rows[i].title) === -1) {
+          roleChoices.push(rows[i].title);
+        }
       }
-    ])
-    .then(responses => {
-      console.log(responses);
+
+      inquirer.prompt([
+        {
+          type: 'list',
+          name: 'employees',
+          message: "Which employee's role would you like to update?",
+          choices: employeeChoices
+        },
+        {
+          type: 'list',
+          name: 'roles',
+          message: 'What would you like to update their role to be?',
+          choices: roleChoices
+        }
+      ])
+      .then(responses => {
+        console.log(responses);
+        // const roleIdSql = `SELECT id FROM roles WHERE title = '${responses.role}';`
+        // let role_id;
+    
+        // db.query(roleIdSql, (err, rows) => {
+        //   role_id = rows[0].id;
+    
+        //   const mgrName = `${responses.manager}`;
+        //   const mgrNameArr = mgrName.split(' ');
+        //   let employee_id;
+    
+        //   const mgrSql =  `SELECT id FROM employees WHERE first_name = '${mgrNameArr[0]}' AND last_name = '${mgrNameArr[1]}';`;
+    
+        //   db.query(mgrSql, (err, rows) => {
+        //     employee_id = rows[0].id;
+        //     console.log(employee_id);
+    
+        //     const sql = `INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?,?,?,?);`
+        //     console.log(sql);
+        //     const params = [`${responses.firstName}`, `${responses.lastName}`, role_id, employee_id];
+        //     console.log(params);
+    
+        //     db.query(sql, params, (err, rows) => {
+        //       console.log(rows);
+        //       console.log(`${responses.firstName} ${responses.lastName} successfully added to Employees database!`);
+        //     });
+        //   });    
+      })
     })
   })
 };
@@ -242,7 +275,7 @@ const promptUser = () => {
       'Add a department',
       'Add a role',
       'Add an employee',
-      'Update an employee'
+      'Update an employee role'
     ]
   })
   .then(response => {
@@ -270,8 +303,8 @@ const promptUser = () => {
       addEmployee();
     }
 
-    if (response.userChoices === 'Update an employee') {
-      updateEmployee();
+    if (response.userChoices === 'Update an employee role') {
+      updateEmployeeRole();
     }
   });
 };
