@@ -177,6 +177,42 @@ const addEmployee = () => {
   })
 };
 
+const updateEmployee = () => {
+  const employeeSql = `SELECT CONCAT (employees.first_name, ' ', employees.last_name) AS name FROM employees;`;
+
+  db.query(employeeSql, (err, rows) => {
+    const employeeChoices = [];
+
+    for (let i = 0; i < rows.length; i++) {
+      if (employeeChoices.indexOf(rows[i].name) === -1) {
+        employeeChoices.push(rows[i].name);
+      }
+    }
+
+    inquirer.prompt([
+      {
+        type: 'list',
+        name: 'employees',
+        message: 'Who does this employee report to?',
+        choices: []
+      },
+      {
+        type: 'input',
+        name: 'firstName',
+        message: 'What is the first name of the employee you would like to add?'
+      },
+      {
+        type: 'input',
+        name: 'lastName',
+        message: 'What is the last name of the employee you would like to add?'
+      }
+    ])
+    .then(responses => {
+      console.log(responses);
+    })
+  })
+};
+
 const viewEmployees = () => {
   const sql = `SELECT
                 employees.id,
@@ -235,7 +271,7 @@ const promptUser = () => {
     }
 
     if (response.userChoices === 'Update an employee') {
-      console.log('Update an employee');
+      updateEmployee();
     }
   });
 };
