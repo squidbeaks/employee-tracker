@@ -1,5 +1,159 @@
 const inquirer = require('inquirer');
-const db = require('../db/connection');
+const cTable = require('console.table');
+const figlet = require('figlet');
+const db = require('./db/connection');
+
+const promptUser = () => {
+  return inquirer.prompt([
+    {
+      type: 'list',
+      name: 'userChoices',
+      message: 'What would you like to do?',
+      choices: [
+        'View all departments',
+        'View all roles',
+        'View all employees',
+        'Add a department',
+        'Add a role',
+        'Add an employee',
+        'Update an employee role',
+        'Exit'
+      ]
+    }
+  ])
+  .then(response => {
+    if (response.userChoices === 'View all departments') {
+      viewDepartments();
+    }
+
+    if (response.userChoices === 'View all roles') {
+      viewRoles();
+    }
+
+    if (response.userChoices === 'View all employees') {
+      viewEmployees();
+    }
+
+    if (response.userChoices === 'Add a department') {
+      addDepartment();
+    }
+
+    if (response.userChoices === 'Add a role') {
+      addRoles();
+    }
+
+    if (response.userChoices === 'Add an employee') {
+      addEmployee();
+    }
+
+    if (response.userChoices === 'Update an employee role') {
+      updateEmployeeRole();
+    }
+
+    if (response.userChoices === 'Exit') {
+      console.log('You exited the Employee Tracker Application');
+      process.exit(1);
+    }
+  })
+};
+
+const viewDepartments = () => {
+  const sql = `SELECT id AS Department_ID, name AS Department FROM departments;`;
+
+  db.query(sql, (err, rows) => {
+    if(err) {
+      console.log(err);
+      return;
+    }
+    console.table(rows);
+    promptUser();
+  });
+};
+
+const addDepartment = () => {
+  inquirer.prompt({
+      type: 'input',
+      name: 'departmentName',
+      message: 'What is the name of the department you would like to add?'
+  })
+  .then(response => {
+    const sql = `INSERT INTO departments (name) VALUES (?);`
+    const params = response.departmentName;
+
+    db.query(sql, params, (err, result) => {
+      console.log(`${params} successfully added to list of departments!`);
+      promptUser();
+    });
+  })
+};
+
+const viewRoles = () => {
+  const sql = `SELECT
+                title AS Title,
+                roles.id AS Role_Id,
+                departments.name AS Department_Name,
+                salary AS Salary
+                FROM roles
+                LEFT JOIN departments ON roles.department_id = departments.id;`
+
+  db.query(sql, (err, rows) => {
+    console.table(rows);
+    promptUser();
+  });
+};
+
+const addRoles = () => {
+  const departmentSql = `SELECT
+              departments.name
+              FROM roles
+              LEFT JOIN departments ON roles.department_id = departments.id;`;
+
+  const choices = [];
+
+  db.query(departmentSql, (err, rows) => {
+    for (let i = 0; i < rows.length; i++) {
+      if (choices.indexOf(rows[i].name) === -1) {
+        choices.push(rows[i].name);
+      }
+    }
+  });
+
+  inquirer.prompt([
+    {
+      type: 'input',
+      name: 'title',
+      message: 'What is the title of the role you would like to add?'
+    },
+    {
+      type: 'number',
+      name: 'salary',
+      message: 'How much is the salary for this role?'
+    },
+    {
+      type: 'list',
+      name: 'department',
+      message: 'What department does this role belong to?',
+      choices: choices
+    }
+  ])
+  .then(responses => {
+    const departmentIdSql = `SELECT id FROM departments WHERE name = '${responses.department}';`
+    let department_id;
+
+    db.query(departmentIdSql, (err, rows) => {
+      department_id = rows[0].id;
+
+      const sql = `INSERT INTO roles (title, salary, department_id) VALUES (?,?,?);`
+      const params = [`${responses.title}`, responses.salary, department_id];
+
+      db.query(sql, params, (err, rows) => {
+        console.log(rows);
+        console.log(`${responses.title} successfully added to Roles database!`);
+        promptUser();
+      })
+    });
+  });
+};
 
 const addEmployee = () => {
   const roleChoices = [];
@@ -76,6 +230,7 @@ const addEmployee = () => {
         db.query(sql, params, (err, rows) => {
           console.log(rows);
           console.log(`${responses.firstName} ${responses.lastName} successfully added to Employees database!`);
+          promptUser();
         });
       });
     })
@@ -144,6 +299,7 @@ const updateEmployeeRole = () => {
             db.query(sql, params, (err, rows) => {
               console.log(rows);
               console.log(`${responses.employees}'s role has been successfully updated!`);
+              promptUser();
             });
           });
         });
@@ -166,7 +322,21 @@ const viewEmployees = () => {
                 LEFT JOIN employees manager on manager.id = employees.manager_id;`
   db.query(sql, (err, rows) => {
     console.table(rows);
+    promptUser();
   });
 };
 
-module.exports = { addEmployee, updateEmployeeRole, viewEmployees };
+
+const init = () => {  
+  figlet('Employee Tracker', function(err, data) {
+    if (err) {
+      console.log('Something went wrong...');
+      console.dir(err);
+      return;
+    }
+    console.log(data);
+    promptUser();
+  });
+};
+
+init();
