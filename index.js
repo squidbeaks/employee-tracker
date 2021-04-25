@@ -30,7 +30,8 @@ const promptUser = () => {
       'Add a department',
       'Add a role',
       'Add an employee',
-      'Update an employee role'
+      'Update an employee role',
+      'Exit'
     ]
   })
   .then(response => {
@@ -61,7 +62,11 @@ const promptUser = () => {
     if (response.userChoices === 'Update an employee role') {
       updateEmployeeRole();
     }
-  });
+    if (response.userChoices === 'Exit') {
+      console.log('You exited the Employee Tracker Application');
+    }
+  })
+//  .then(promptUser);
 };
 
 init();
