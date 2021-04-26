@@ -18,6 +18,7 @@ const promptUser = () => {
         'Add an employee',
         'Update an employee role',
         'Update an employee manager',
+        'View employees by manager',
         'Exit'
       ]
     }
@@ -53,6 +54,10 @@ const promptUser = () => {
 
     if (response.userChoices === 'Update an employee manager') {
       updateEmployeeMgr();
+    }
+
+    if (response.userChoices === 'View employees by manager') {
+      viewEmployeesByMgr();
     }
 
     if (response.userChoices === 'Exit') {
@@ -394,6 +399,53 @@ const viewEmployees = () => {
   });
 };
 
+const viewEmployeesByMgr = () => {
+  const mgrSql = `SELECT
+                    CONCAT(manager.first_name, ' ', manager.last_name) AS manager_name
+                    FROM employees
+                    LEFT JOIN roles on employees.role_id=roles.id
+                    LEFT JOIN employees manager on manager.id = employees.manager_id;`;
+
+  db.query(mgrSql, (err, rows) => {
+    const managerChoices = [];
+
+    for (let i = 0; i < rows.length; i++) {
+      if (managerChoices.indexOf(rows[i].manager_name) === -1) {
+        managerChoices.push(rows[i].manager_name);
+      }
+    }
+
+    inquirer.prompt([
+      {
+        type: 'list',
+        name: 'manager',
+        message: "Which manager's team would you like to view?",
+        choices: managerChoices
+      }
+    ])
+    .then(response => {
+      console.log(response);
+
+      const mgrName = `${response.manager}`;
+      const mgrNameArr = mgrName.split(' ');
+      let manager_id;
+
+      const mgrSql =  `SELECT id FROM employees WHERE first_name = '${mgrNameArr[0]}' AND last_name = '${mgrNameArr[1]}';`;
+
+      db.query(mgrSql, (err, rows) => {
+        manager_id = rows[0].id;
+        console.log(manager_id);
+
+        const teamSql = `SELECT CONCAT(employees.first_name, ' ', employees.last_name) AS 'Employee(s)' FROM employees WHERE manager_id = ${manager_id};`;
+
+        db.query(teamSql, (err, rows) => {
+          console.table(rows);
+          promptUser();
+        });
+      })
+    })
+  })
+};
 
 const init = () => {  
   figlet('Employee Tracker', function(err, data) {
