@@ -113,10 +113,7 @@ const viewRoles = () => {
 };
 
 const addRoles = () => {
-  const departmentSql = `SELECT
-              departments.name
-              FROM roles
-              LEFT JOIN departments ON roles.department_id = departments.id;`;
+  const departmentSql = `SELECT name FROM departments;`;
 
   const choices = [];
 
